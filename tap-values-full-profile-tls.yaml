@@ -1,0 +1,96 @@
+shared:
+  ingress_domain: "35.202.48.177.nip.io" # Ingress-Domain that points to Envoy service external IP address along with a wildcard domain/FQDN 
+  ingress_issuer: "" # Optional, can denote a cert-manager.io/v1/ClusterIssuer of your choice. Defaults to "tap-ingress-selfsigned".
+
+  image_registry:
+    project_path: "SERVER-NAME/REPO-NAME" ## e.g index.docker.io/chakrabortsu181/build-service
+    username: "IMAGE-REGISTRY-USERNAME" # dockerhub/OCI registry username
+    password: "IMAGE-REGISTRY-PASSWORD" # dockerhub/OCI registry password
+
+kubernetes_distribution: "openshift" # To be passed only for OpenShift. Defaults to "".
+kubernetes_version: "K8S-VERSION" # To be passed only for OpenShift
+
+ceip_policy_disclosed: true # Installation fails if this is not set to true. Not a string.
+
+#The above keys are minimum numbers of entries needed in tap-values.yaml to get a functioning TAP Full profile installation.
+
+#Below are the keys which may have default values set, but can be overridden.
+
+profile: full # Can take iterate, build, run, view.
+
+supply_chain: basic # Can take testing, testing_scanning.
+
+ootb_supply_chain_basic: # Based on supply_chain set above, can be changed to ootb_supply_chain_testing, ootb_supply_chain_testing_scanning.
+  registry:
+    server: "SERVER-NAME" # Takes the value from shared section above by default, but can be overridden by setting a different value.
+    repository: "REPO-NAME" # Takes the value from shared section above by default, but can be overridden by setting a different value.
+  gitops:
+    ssh_secret: "" # Takes "" as value by default; but can be overridden by setting a different value.
+
+contour:
+  envoy:
+    hostNetwork: true      
+    service:
+      type: LoadBalancer  # This is set by default, but can be overridden by setting a different value
+
+buildservice:
+  kp_default_repository: "SERVER-NAME/REPO-NAME" ## e.g index.docker.io/chakrabortsu181/build-service
+  kp_default_repository_username: "IMAGE-REGISTRY-USERNAME" # dockerhub/OCI registry username
+  kp_default_repository_password: "IMAGE-REGISTRY-PASSWORD" # dockerhub/OCI registry password
+
+tap_gui:
+  service_type: ClusterIP # If the shared.ingress_domain is set as above, this must be set to ClusterIP.
+  ingressEnabled: true
+  ingressDomain: "35.202.48.177.nip.io" #Ingress-Domain
+  tls:
+    secretName: cnrs-default-tls
+    namespace: tanzu-system-ingress
+  app_config:
+    customize:      
+      custom_name: 'TAP on GCP'
+    organization:
+      name: 'VMware Tanzu Labs'       
+    catalog:
+      locations:
+        - type: url
+          target: https://github.com/suchakra012/tap-yelb-catalog/blob/main/catalog-info.yaml
+
+accelerator:
+  domain: "35.202.48.177.nip.io" #Ingress-Domain  
+  ingress:
+    include: true
+    enable_tls: true
+  tls:
+    secret_name: cnrs-default-tls
+    namespace: tanzu-system-ingress
+  server:
+    service_type: ClusterIP
+
+metadata_store:
+  ns_for_export_app_cert: "dev"
+  app_service_type: ClusterIP # Defaults to LoadBalancer. If shared.ingress_domain is set earlier, this must be set to ClusterIP.
+
+cnrs:
+  domain_name: "35.202.48.177.nip.io" "Ingress-Domain  
+  domain_template: "{{.Name}}-{{.Namespace}}.{{.Domain}}"
+  default_tls_secret: tanzu-system-ingress/cnrs-default-tls
+
+scanning:
+  metadataStore:
+    url: "" # Configuration is moved, so set this string to empty.
+
+package_overlays:
+- name: cnrs
+  secrets:
+  - name: cnrs-default-tls
+
+excluded_packages:
+- learningcenter.tanzu.vmware.com
+- workshops.learningcenter.tanzu.vmware.com
+
+grype:
+  namespace: "default"
+  targetImagePullSecret: "registries-credentials"
+
+policy:
+  tuf_enabled: false # By default, TUF initialization and keyless verification are deactivated.
