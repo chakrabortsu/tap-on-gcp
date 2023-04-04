@@ -1,0 +1,41 @@
+profile: build
+ceip_policy_disclosed: true # Installation fails if this is not set to true. Not a string.
+
+shared:
+  ingress_domain: "35.202.48.177.nip.io"
+  kubernetes_distribution: "" # To be passed only for Openshift. Defaults to "".
+  kubernetes_version: ""
+  image_registry:
+    project_path: "index.docker.io/chakrabortsu181/build-service" # To be used by Build Service by appending "/buildservice" and used by Supply chain by appending "/workloads".
+    username: "chakrabortsu181"
+    password: "xxxxxxxxxxxxxx"
+
+# The above shared keys can be overridden in the below section.
+
+buildservice: # Optional if the corresponding shared keys are provided.
+  kp_default_repository: "KP-DEFAULT-REPO"
+  kp_default_repository_username: "KP-DEFAULT-REPO-USERNAME"
+  kp_default_repository_password: "KP-DEFAULT-REPO-PASSWORD"
+supply_chain: testing_scanning
+ootb_supply_chain_testing_scanning: # Optional if the corresponding shared keys are provided.
+  registry:
+    server: "index.docker.io"
+    repository: "chakrabortsu181"
+  gitops:
+    ssh_secret: "" # (Optional) Defaults to "".
+grype:
+  namespace: "default" # (Optional) Defaults to default namespace.
+  targetImagePullSecret: "registries-credentials"
+  metadataStore:
+    url: https://metadata-store.35.202.48.177.nip.io
+    caSecret:
+        name: store-ca-cert
+        importFromNamespace: metadata-store-secrets
+    authSecret:
+        name: store-auth-token
+        importFromNamespace: metadata-store-secrets
+scanning:
+  metadataStore:
+    url: "" # Configuration is moved, so set this string to empty.
+tap_telemetry:
+  customer_entitlement_account_number: "" # (Optional) Identify data for creating Tanzu Application Platform usage reports.
