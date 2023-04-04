@@ -1,0 +1,40 @@
+profile: view
+ceip_policy_disclosed: true # Installation fails if this is not set to true. Not a string.
+
+shared:
+  ingress_domain: "35.202.48.177.nip.io" # Set the Ingress_Domain value here
+
+contour:
+  envoy:
+    service:
+      type: LoadBalancer # NodePort can be used if your Kubernetes cluster doesn't support LoadBalancing.
+
+tap_gui:
+  service_type: ClusterIP
+  app_config:
+    catalog:
+      locations:
+        - type: url
+          target: https://github.com/suchakra012/tap-yelb-catalog/blob/main/catalog-info.yaml  
+    kubernetes:
+      serviceLocatorMethod:
+        type: 'multiTenant'
+      clusterLocatorMethods:
+        - type: 'config'
+          clusters:
+            - url: CLUSTER-URL
+              name: CLUSTER-NAME # Build profile cluster can go here.
+              authProvider: serviceAccount
+              serviceAccountToken: CLUSTER-TOKEN
+              skipTLSVerify: true #Value to be set as true/false
+            - url: CLUSTER-URL
+              name: CLUSTER-NAME # Run profile cluster can go here.
+              authProvider: serviceAccount
+              serviceAccountToken: CLUSTER-TOKEN
+              skipTLSVerify: true #Value to be set as true/false
+
+appliveview:
+  ingressEnabled: true
+
+tap_telemetry:
+  customer_entitlement_account_number: "" # (Optional) Identify data for creating Tanzu Application Platform usage reports.
