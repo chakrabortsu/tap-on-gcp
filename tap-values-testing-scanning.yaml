@@ -1,0 +1,91 @@
+shared:
+  ingress_domain: "34.136.244.48.nip.io" # Ingress-Domain that points to Envoy service external IP address along with a wildcard domain/FQDN 
+  ingress_issuer: "" # Optional, can denote a cert-manager.io/v1/ClusterIssuer of your choice. Defaults to "tap-ingress-selfsigned".
+
+  image_registry:
+    project_path: "index.docker.io/chakrabortsu181/build-service" ## e.g index.docker.io/chakrabortsu181/build-service
+    username: "chakrabortsu181" # dockerhub/OCI registry username
+    password: "xxxxxx" # dockerhub/OCI registry password
+
+
+ceip_policy_disclosed: true # Installation fails if this is not set to true. Not a string.
+
+#The above keys are minimum numbers of entries needed in tap-values.yaml to get a functioning TAP Full profile installation.
+
+#Below are the keys which may have default values set, but can be overridden.
+
+profile: full # Can take iterate, build, run, view.
+
+supply_chain: testing_scanning # Can take testing, testing_scanning.
+
+ootb_supply_chain_testing_scanning: # Based on supply_chain set above, can be changed to ootb_supply_chain_testing, ootb_supply_chain_testing_scanning.
+  registry:
+    server: "index.docker.io" # Takes the value from shared section above by default, but can be overridden by setting a different value.
+    repository: "chakrabortsu181" # Takes the value from shared section above by default, but can be overridden by setting a different value.
+  scanning:
+    source:
+      template: blob-source-scan-template
+      policy: source-scan-policy
+    image:
+      template: snyk-private-image-scan-template
+      policy: snyk-scan-policy
+  gitops:
+    ssh_secret: "" # Takes "" as value by default; but can be overridden by setting a different value.
+
+contour:
+  envoy:
+    hostNetwork: true      
+    service:
+      type: LoadBalancer  # This is set by default, but can be overridden by setting a different value
+
+buildservice:
+  kp_default_repository: "index.docker.io/chakrabortsu181/build-service" ## e.g index.docker.io/chakrabortsu181/build-service
+  kp_default_repository_username: "chakrabortsu181" # dockerhub/OCI registry username
+  kp_default_repository_password: "xxxxxxx" # dockerhub/OCI registry password
+
+tap_gui:
+  service_type: ClusterIP # If the shared.ingress_domain is set as above, this must be set to ClusterIP.
+  app_config:
+    proxy:
+      /metadata-store:
+        target: https://metadata-store-app.metadata-store:8443/api/v1
+        changeOrigin: true
+        secure: false
+        headers:
+          Authorization: "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImVsc2RKLUxWVFZxMlI5elE3VU5jOVVRdXBaeFVmWUY0bDktRzF5UkcwNVEifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJtZXRhZGF0YS1zdG9yZSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJtZXRhZGF0YS1zdG9yZS1yZWFkLXdyaXRlLWNsaWVudCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJtZXRhZGF0YS1zdG9yZS1yZWFkLXdyaXRlLWNsaWVudCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImU5Mzg4ZjdjLTRiZWUtNGUzMC1hZmI2LTJjNjhiOTg4ZGZmNSIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDptZXRhZGF0YS1zdG9yZTptZXRhZGF0YS1zdG9yZS1yZWFkLXdyaXRlLWNsaWVudCJ9.n1If1uuBh5awCn36JiVbYPJzfCQrAYrr_eU6IilfgfCKit3Y2NgP-8i2UEPy7T3Gbu2rPOutPdHd0pCOtM9h_zSOvzGcLYmlHs5Z8_spDzDp3020vFQE7ZZTBLrXuOpX3KIE6IgnsaIA94YUMO9DCGoab2kcNQCHi9rUHZVB27DTiQevWPy5iRmcyr6o_zWNRWm3J0pTQHHLWh3XEm-x2Exz-EZk6VBdo7zOAxH8rJ-NjP-SAhgOh9I5GGkZvK0z-l_0stSWp_pfQHJSJxObbdJcLUY3_Y5gnbydXaJt1294QY5_iR0BHNNJ7WQWbBQVmoP6WwMmR0uDuG4JWWIhCw"
+          X-Custom-Source: project-star
+    organization:
+      name: 'VMware Tanzu Labs'       
+    catalog:
+      locations:
+        - type: url
+          target: https://github.com/suchakra012/tap-yelb-catalog/blob/main/catalog-info.yaml
+
+accelerator:
+  domain: "34.136.244.48.nip.io" #Ingress-Domain  
+  ingress:
+    include: true
+
+metadata_store:
+  ns_for_export_app_cert: "dev"
+  app_service_type: ClusterIP # Defaults to LoadBalancer. If shared.ingress_domain is set earlier, this must be set to ClusterIP.
+
+cnrs:
+  domain_name: "34.136.244.48.nip.io" # Ingress-Domain  
+  domain_template: "{{.Name}}-{{.Namespace}}.{{.Domain}}"
+
+scanning:
+  metadataStore:
+    url: "" # Configuration is moved, so set this string to empty.
+
+
+#excluded_packages:
+#- learningcenter.tanzu.vmware.com
+#- workshops.learningcenter.tanzu.vmware.com
+
+grype:
+  namespace: "default"
+  targetImagePullSecret: "registries-credentials"
+
+policy:
+  tuf_enabled: false # By default, TUF initialization and keyless verification are deactivated.
